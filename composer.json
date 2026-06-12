@@ -3,6 +3,10 @@
     "description": "Shared OAuth/JWT SSO protocol for IdP server and client applications.",
     "type": "library",
     "license": "proprietary",
+    "homepage": "https://github.com/asheek21-baaboo/sso-composer",
+    "support": {
+        "source": "https://github.com/asheek21-baaboo/sso-composer"
+    },
     "require": {
         "php": "^8.3",
         "firebase/php-jwt": "^7.0",

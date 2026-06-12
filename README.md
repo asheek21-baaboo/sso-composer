@@ -2,6 +2,8 @@
 
 Shared OAuth 2.0 authorization-code + RS256 JWT SSO for Laravel applications.
 
+**Repository:** [github.com/asheek21-baaboo/sso-composer](https://github.com/asheek21-baaboo/sso-composer)
+
 One package, two modes:
 
 | Mode | Host app | Role |
@@ -16,11 +18,27 @@ One package, two modes:
 
 ## Installation
 
-```bash
-composer require company/sso
+This package is not on Packagist. Add the GitHub repository to the consuming app's `composer.json`, then require it:
+
+```json
+{
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/asheek21-baaboo/sso-composer"
+        }
+    ],
+    "require": {
+        "company/sso": "dev-main"
+    }
+}
 ```
 
-For local development with a path repository:
+```bash
+composer update company/sso
+```
+
+For local development (sibling checkout):
 
 ```json
 {
@@ -141,7 +159,11 @@ $this->app->bind(OAuthAuditLogger::class, EloquentOAuthAuditLogger::class);
 
 ## Development
 
+Clone the repository:
+
 ```bash
+git clone https://github.com/asheek21-baaboo/sso-composer.git
+cd sso-composer
 composer install
 vendor/bin/pest --compact
 vendor/bin/phpstan analyse
@@ -150,11 +172,11 @@ vendor/bin/pint
 
 ## Related repos
 
-```
-sso-composer/   ← this package (company/sso)
-baaboo-sso/     ← IdP (server mode)
-sso-starter/    ← minimal client template (client mode)
-```
+| Repo | Role |
+|------|------|
+| [sso-composer](https://github.com/asheek21-baaboo/sso-composer) | This package (`company/sso`) |
+| `baaboo-sso` | IdP host app (server mode) |
+| `sso-starter` | Minimal client template (client mode) |
 
 See [docs/implementation-summary.md](docs/implementation-summary.md) for a full build and integration checklist.
 
