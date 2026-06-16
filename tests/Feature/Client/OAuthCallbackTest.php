@@ -1,10 +1,22 @@
 <?php
 
-use Company\Sso\Support\AccessTokenCookie;
+use Company\Sso\Client\Support\AccessTokenCookie;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
+uses()->group('client');
+
 beforeEach(function (): void {
+    config([
+        'sso.mode' => 'client',
+        'sso.idp_url' => 'https://idp.test',
+        'sso.project_id' => 'my-app',
+        'sso.client_id' => (string) \Illuminate\Support\Str::uuid(),
+        'sso.client_secret' => 'secret',
+        'sso.app_url' => 'https://app.test',
+        'sso.home_route' => 'home',
+    ]);
+
     Route::get('/home', fn () => 'home')->name('home');
 });
 

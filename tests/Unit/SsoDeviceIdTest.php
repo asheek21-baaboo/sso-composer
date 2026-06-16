@@ -1,6 +1,6 @@
 <?php
 
-use Company\Sso\Support\SsoDeviceId;
+use Company\Sso\Core\Support\SsoDeviceId;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 

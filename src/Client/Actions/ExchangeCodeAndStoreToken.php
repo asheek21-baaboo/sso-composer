@@ -1,10 +1,10 @@
 <?php
 
-namespace Company\Sso\Actions;
+namespace Company\Sso\Client\Actions;
 
-use Company\Sso\Support\AccessTokenCookie;
-use Company\Sso\Support\OAuthUrls;
-use Company\Sso\Support\SsoDeviceId;
+use Company\Sso\Client\Support\AccessTokenCookie;
+use Company\Sso\Core\Support\OAuthUrls;
+use Company\Sso\Core\Support\SsoDeviceId;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;

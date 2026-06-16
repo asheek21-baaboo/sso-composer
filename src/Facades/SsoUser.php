@@ -2,7 +2,7 @@
 
 namespace Company\Sso\Facades;
 
-use Company\Sso\SsoAuthenticatedUser;
+use Company\Sso\Client\SsoAuthenticatedUser;
 use Illuminate\Support\Facades\Facade;
 
 /**

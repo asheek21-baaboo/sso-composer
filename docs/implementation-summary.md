@@ -8,9 +8,14 @@ This document explains **what this package provides** and **what each related pr
 
 ## One-sentence summary
 
-`company/sso` is a **Laravel relying-party (RP) library**: it logs users in via `baaboo-sso`, exchanges the OAuth code for a JWT, stores it in a cookie, and protects your routes with middleware.
+`company/sso` is a **shared OAuth/JWT library** with two modes:
 
-It is **not** the identity provider. It does **not** issue tokens, manage users, or host `/oauth/authorize`.
+| `SSO_MODE` | Host | Role |
+|------------|------|------|
+| **`server`** | `baaboo-sso` | IdP — token issue, JWKS, heartbeat, session end |
+| **`client`** | Internal apps / `sso-starter` | RP — login redirect, callback, JWT cookie, `sso.auth` |
+
+`/oauth/authorize` (Fortify login) stays in `baaboo-sso` only.
 
 ---
 
@@ -19,7 +24,7 @@ It is **not** the identity provider. It does **not** issue tokens, manage users,
 | Project | Who maintains it | Role |
 |---------|------------------|------|
 | **`baaboo-sso`** | Platform / SSO team | **IdP** — users, projects, OAuth authorize, token issue, JWKS, session lifecycle |
-| **`company/sso`** (this package) | Platform / shared library | **RP client** — login redirect, callback, token exchange, JWT cookie, auth middleware |
+| **`company/sso`** (this package) | Platform / shared library | **Server + client** — shared protocol; mode via `SSO_MODE` |
 | **`sso-starter`** | Platform (template) | Cloneable minimal Laravel app with this package pre-wired |
 | **Internal apps** | Product teams | Any Laravel app that `composer require`s this package and configures `.env` |
 
@@ -144,7 +149,7 @@ Platform admin gives devs: `SSO_BASE_URL`, `SSO_PROJECT_ID`, `SSO_CLIENT_ID`, `S
 - [ ] JWT claims include: `sub`, `email`, `global_role`, `project_id`, `project_role`, `createUser`, `iss`, `aud`, `exp`, `jti`
 - [ ] `iss` matches `SSO_BASE_URL` (normalized, no trailing slash mismatch)
 
-> **Note:** IdP OAuth server code lives in **`baaboo-sso`**, not in this package. An earlier version of this library included server mode; that was removed. If `baaboo-sso` still references `SSO_MODE=server` from this package, migrate server endpoints back into the IdP app.
+> **Note:** Set `SSO_MODE=server` in `baaboo-sso` and bind the five contracts (see [Host integration](#host-integration-server-mode)). Set `SSO_MODE=client` in internal apps with `SSO_*` credentials.
 
 ---
 

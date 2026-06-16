@@ -1,7 +1,7 @@
 <?php
 
-use Company\Sso\Http\Controllers\OAuthCallbackController;
-use Company\Sso\Http\Controllers\SsoLoginController;
+use Company\Sso\Client\Http\Controllers\OAuthCallbackController;
+use Company\Sso\Client\Http\Controllers\SsoLoginController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/login', SsoLoginController::class)->name('sso.login');

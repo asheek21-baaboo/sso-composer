@@ -1,6 +1,6 @@
 <?php
 
-namespace Company\Sso\Support;
+namespace Company\Sso\Client\Support;
 
 use Symfony\Component\HttpFoundation\Cookie;
 
