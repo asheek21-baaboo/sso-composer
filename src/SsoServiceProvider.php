@@ -2,13 +2,8 @@
 
 namespace Company\Sso;
 
-use Company\Sso\Client\Http\Middleware\AuthenticateSso;
-use Company\Sso\Core\Contracts\OAuthAuditLogger;
-use Company\Sso\Core\Jwt\AccessTokenIssuer;
-use Company\Sso\Core\Jwt\AccessTokenVerifier;
-use Company\Sso\Core\Jwt\JwtKeyLoader;
-use Company\Sso\Core\Jwt\RemoteJwksVerifier;
-use Company\Sso\Core\NullOAuthAuditLogger;
+use Company\Sso\Http\Middleware\AuthenticateSso;
+use Company\Sso\Jwt\RemoteJwksVerifier;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -18,14 +13,7 @@ class SsoServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__.'/../config/sso.php', 'sso');
 
-        $this->app->singleton(JwtKeyLoader::class, fn (): JwtKeyLoader => JwtKeyLoader::fromApplicationConfig());
-        $this->app->singleton(AccessTokenIssuer::class);
-        $this->app->singleton(AccessTokenVerifier::class);
         $this->app->singleton(RemoteJwksVerifier::class);
-
-        if (! $this->app->bound(OAuthAuditLogger::class)) {
-            $this->app->singleton(OAuthAuditLogger::class, NullOAuthAuditLogger::class);
-        }
 
         $this->app['router']->aliasMiddleware('sso.auth', AuthenticateSso::class);
     }
@@ -42,16 +30,8 @@ class SsoServiceProvider extends ServiceProvider
             return;
         }
 
-        $mode = (string) config('sso.mode', 'client');
-
-        if ($mode === 'server') {
-            Route::middleware((array) config('sso.routes.server_middleware', ['api']))
-                ->prefix((string) config('sso.routes.server_prefix', ''))
-                ->group(__DIR__.'/../routes/server.php');
-        } else {
-            Route::middleware((array) config('sso.routes.client_middleware', ['web']))
-                ->prefix((string) config('sso.routes.client_prefix', ''))
-                ->group(__DIR__.'/../routes/client.php');
-        }
+        Route::middleware((array) config('sso.routes.middleware', ['web']))
+            ->prefix((string) config('sso.routes.prefix', ''))
+            ->group(__DIR__.'/../routes/web.php');
     }
 }

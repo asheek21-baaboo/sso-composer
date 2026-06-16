@@ -1,24 +1,42 @@
 # company/sso
 
-Shared OAuth 2.0 authorization-code + RS256 JWT SSO for Laravel applications.
+Laravel SSO **client** library for internal apps that authenticate against the company IdP (`baaboo-sso`).
+
+Devs do **not** install or run the core SSO system. They clone a minimal Laravel app, add this package, configure OAuth credentials, and get:
+
+- Redirect to IdP login
+- OAuth callback + **authorization-code token exchange**
+- JWT stored in an httpOnly cookie
+- **`sso.auth` middleware** + `SsoUser` facade
 
 **Repository:** [github.com/asheek21-baaboo/sso-composer](https://github.com/asheek21-baaboo/sso-composer)
 
-One package, two modes:
+## How it fits together
 
-| Mode | Host app | Role |
-|------|----------|------|
-| `server` | IdP (e.g. `baaboo-sso`) | Issues codes/tokens, JWKS, heartbeat, session end |
-| `client` | Internal apps (e.g. `sso-starter`) | Login redirect, callback, JWT cookie, auth middleware |
+```
+baaboo-sso (IdP)          your-app + company/sso (RP)
+─────────────────         ────────────────────────────
+/oauth/authorize    ←──   redirect to login
+/oauth/token        ←──   POST code exchange (package)
+/jwks               ←──   verify JWT (package)
+/oauth/heartbeat            (optional, host app)
+/oauth/session/end          logout (package)
+
+/login, /oauth/callback     registered by package
+/dashboard                  protected with sso.auth
+```
+
+The IdP owns users, projects, and token issuance. This package is only the **relying-party** side.
 
 ## Requirements
 
 - PHP ^8.3
 - Laravel ^13 (via `illuminate/*` ^13)
+- OAuth client credentials from the platform admin (`SSO_CLIENT_ID`, `SSO_CLIENT_SECRET`, project slug)
 
 ## Installation
 
-This package is not on Packagist. Add the GitHub repository to the consuming app's `composer.json`, then require it:
+This package is not on Packagist. Add the GitHub repository to your app's `composer.json`:
 
 ```json
 {
@@ -38,7 +56,7 @@ This package is not on Packagist. Add the GitHub repository to the consuming app
 composer update company/sso
 ```
 
-For local development (sibling checkout):
+Local path checkout (monorepo / Laragon):
 
 ```json
 {
@@ -59,28 +77,9 @@ php artisan vendor:publish --tag=sso-config
 
 ## Configuration
 
-Set `SSO_MODE` in `.env`:
-
-### Server (IdP)
-
 ```env
-SSO_MODE=server
-JWT_ISSUER=https://sso.company.test
-JWT_KEY_ID=company-sso-1
-JWT_TTL_SECONDS=36000
-JWT_AUTHORIZATION_CODE_TTL=60
-JWT_PRIVATE_KEY_PEM=...
-JWT_PUBLIC_KEY_PEM=...
-# or JWT_PRIVATE_KEY_PATH / JWT_PUBLIC_KEY_PATH
-```
-
-The host app must bind the five contracts (see [Host integration](#host-integration-server-mode)).
-
-### Client (RP)
-
-```env
-SSO_MODE=client
 APP_URL=https://my-app.test
+
 SSO_BASE_URL=https://sso.company.test
 SSO_PROJECT_ID=my-app
 SSO_CLIENT_ID=
@@ -88,30 +87,25 @@ SSO_CLIENT_SECRET=
 SSO_HOME_ROUTE=home
 ```
 
-## Routes
+| Variable | Purpose |
+|----------|---------|
+| `APP_URL` | Builds `{APP_URL}/oauth/callback` redirect URI |
+| `SSO_BASE_URL` | IdP base URL (no trailing slash) |
+| `SSO_PROJECT_ID` | Project slug (`aud` / `project_id` in JWT) |
+| `SSO_CLIENT_ID` | OAuth client UUID |
+| `SSO_CLIENT_SECRET` | Plain secret from admin (server-side only) |
+| `SSO_HOME_ROUTE` | Named route after successful callback |
 
-Registered automatically when `config('sso.routes.register')` is `true`.
+Optional: `SSO_JWKS_CACHE_SECONDS` (default `3600`).
 
-### Server
-
-| Method | Path | Purpose |
-|--------|------|---------|
-| `POST` | `/oauth/token` | Exchange authorization code for access token |
-| `POST` | `/oauth/heartbeat` | Keep session alive |
-| `POST` | `/oauth/session/end` | End session / revoke token |
-| `GET` | `/jwks` | Public signing keys |
-| `GET` | `/.well-known/jwks.json` | JWKS (alias) |
-
-Authorize (`/oauth/authorize`) stays in the host IdP app (Fortify session).
-
-### Client
+## Routes (registered by the package)
 
 | Method | Path | Name |
 |--------|------|------|
 | `GET` | `/login` | `sso.login` |
 | `GET` | `/oauth/callback` | `sso.callback` |
 
-Protect app routes with the `sso.auth` middleware:
+Protect your app:
 
 ```php
 Route::middleware('sso.auth')->group(function () {
@@ -119,9 +113,9 @@ Route::middleware('sso.auth')->group(function () {
 });
 ```
 
-## Client usage
+## Authenticated user
 
-After `sso.auth` middleware runs, read the authenticated user:
+After `sso.auth` runs:
 
 ```php
 use Company\Sso\Facades\SsoUser;
@@ -130,36 +124,16 @@ SsoUser::id();
 SsoUser::email();
 SsoUser::projectRole();
 SsoUser::globalRole();
-SsoUser::createUser();
+SsoUser::createUser(); // whether IdP provisions users for this project
 ```
 
-JWT claims match the fixed protocol (`sub`, `email`, `global_role`, `project_id`, `project_role`, `createUser`, etc.).
+JWT is verified via remote JWKS from `{SSO_BASE_URL}/jwks`.
 
-## Host integration (server mode)
+## Starter app
 
-Implement and bind these contracts in your service provider:
+See `sso-starter` — minimal Laravel template with this package pre-wired.
 
-| Contract | Purpose |
-|----------|---------|
-| `OAuthProjectResolver` | Resolve projects by slug/id |
-| `OAuthUserResolver` | User lookup, project access, role |
-| `OAuthAuthorizationCodeStore` | Persist one-time codes |
-| `OAuthSessionStore` | Device-scoped access sessions |
-| `OAuthAuditLogger` | Audit log (optional; defaults to no-op) |
-
-Example (see `baaboo-sso` for full Eloquent adapters):
-
-```php
-$this->app->bind(OAuthProjectResolver::class, EloquentOAuthProjectResolver::class);
-$this->app->bind(OAuthUserResolver::class, EloquentOAuthUserResolver::class);
-$this->app->bind(OAuthAuthorizationCodeStore::class, EloquentOAuthAuthorizationCodeStore::class);
-$this->app->bind(OAuthSessionStore::class, EloquentOAuthSessionStore::class);
-$this->app->bind(OAuthAuditLogger::class, EloquentOAuthAuditLogger::class);
-```
-
-## Development
-
-Clone the repository:
+## Development (this repo)
 
 ```bash
 git clone https://github.com/asheek21-baaboo/sso-composer.git
@@ -170,15 +144,9 @@ vendor/bin/phpstan analyse
 vendor/bin/pint
 ```
 
-## Related repos
+## Further reading
 
-| Repo | Role |
-|------|------|
-| [sso-composer](https://github.com/asheek21-baaboo/sso-composer) | This package (`company/sso`) |
-| `baaboo-sso` | IdP host app (server mode) |
-| `sso-starter` | Minimal client template (client mode) |
-
-See [docs/implementation-summary.md](docs/implementation-summary.md) for a full build and integration checklist.
+- [docs/implementation-summary.md](docs/implementation-summary.md) — build history and integration notes
 
 ## License
 
