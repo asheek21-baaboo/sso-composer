@@ -25,7 +25,6 @@ beforeEach(function (): void {
     $publicPem = (string) file_get_contents(__DIR__.'/../../Fixtures/jwt/rs256-public.pem');
 
     config([
-        'sso.mode' => 'server',
         'sso.private_key_pem' => $privatePem,
         'sso.public_key_pem' => $publicPem,
         'sso.key_id' => 'test-kid',

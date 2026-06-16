@@ -8,8 +8,7 @@ uses()->group('client');
 
 beforeEach(function (): void {
     config([
-        'sso.mode' => 'client',
-        'sso.idp_url' => 'https://idp.test',
+        'sso.base_url' => 'https://idp.test',
         'sso.project_id' => 'my-app',
         'sso.client_id' => (string) \Illuminate\Support\Str::uuid(),
         'sso.client_secret' => 'secret',

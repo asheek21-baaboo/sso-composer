@@ -8,9 +8,11 @@ class ClientTestCase extends TestCase
     {
         parent::defineEnvironment($app);
 
+        putenv('SSO_MODE=client');
+        $_ENV['SSO_MODE'] = 'client';
+
         $app['config']->set([
-            'sso.mode' => 'client',
-            'sso.idp_url' => 'https://idp.test',
+            'sso.base_url' => 'https://idp.test',
             'sso.project_id' => 'my-app',
             'sso.client_id' => '00000000-0000-4000-8000-000000000001',
             'sso.client_secret' => 'secret',

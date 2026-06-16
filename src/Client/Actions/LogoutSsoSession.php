@@ -14,7 +14,7 @@ final class LogoutSsoSession
     public function execute(Request $request): RedirectResponse
     {
         $token = $request->cookie(AccessTokenCookie::name());
-        $idpUrl = (string) config('sso.idp_url');
+        $idpUrl = (string) config('sso.base_url');
 
         if (is_string($token) && $token !== '' && $idpUrl !== '') {
             try {

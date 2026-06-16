@@ -147,6 +147,7 @@ vendor/bin/pint
 ## Further reading
 
 - [docs/implementation-summary.md](docs/implementation-summary.md) — integration guide: what this package provides, and what IdP / apps / sso-starter must do
+- [docs/minimal-idp-host-guide.md](docs/minimal-idp-host-guide.md) — minimal IdP host (`SSO_MODE=server`): checklist, boilerplate inventory, proposed package additions
 
 ## License
 

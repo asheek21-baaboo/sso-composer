@@ -14,17 +14,17 @@ final class RemoteJwksVerifier
 {
     public function decode(string $jwt): stdClass
     {
-        $idpUrl = rtrim((string) config('sso.idp_url'), '/');
+        $baseUrl = rtrim((string) config('sso.base_url'), '/');
         $projectId = (string) config('sso.project_id');
 
-        if ($idpUrl === '' || $projectId === '') {
-            throw new RuntimeException('SSO idp_url and project_id must be configured.');
+        if ($baseUrl === '' || $projectId === '') {
+            throw new RuntimeException('SSO_BASE_URL and SSO_PROJECT_ID must be configured.');
         }
 
         $header = $this->decodeJwtHeader($jwt);
         $kid = isset($header->kid) ? (string) $header->kid : '';
 
-        $jwks = $this->fetchJwks($idpUrl);
+        $jwks = $this->fetchJwks($baseUrl);
         $keys = JWK::parseKeySet($jwks);
 
         if ($kid !== '' && isset($keys[$kid])) {
@@ -38,7 +38,7 @@ final class RemoteJwksVerifier
         $claims = JWT::decode($jwt, $key);
 
         $iss = isset($claims->iss) ? rtrim((string) $claims->iss, '/') : '';
-        if ($iss !== $idpUrl) {
+        if ($iss !== $baseUrl) {
             throw new RuntimeException('Invalid token issuer.');
         }
 

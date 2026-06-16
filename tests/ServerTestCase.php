@@ -8,11 +8,13 @@ class ServerTestCase extends TestCase
     {
         parent::defineEnvironment($app);
 
+        putenv('SSO_MODE=server');
+        $_ENV['SSO_MODE'] = 'server';
+
         $privatePem = (string) file_get_contents(__DIR__.'/Fixtures/jwt/rs256-private.pem');
         $publicPem = (string) file_get_contents(__DIR__.'/Fixtures/jwt/rs256-public.pem');
 
         $app['config']->set([
-            'sso.mode' => 'server',
             'sso.private_key_pem' => $privatePem,
             'sso.public_key_pem' => $publicPem,
             'sso.key_id' => 'test-kid',

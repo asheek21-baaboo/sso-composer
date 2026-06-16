@@ -13,7 +13,7 @@ final class ExchangeCodeAndStoreToken
 {
     public function execute(string $code, Request $request): RedirectResponse
     {
-        $idpUrl = (string) config('sso.idp_url');
+        $idpUrl = (string) config('sso.base_url');
         $redirectUri = OAuthUrls::redirectUri(
             (string) config('sso.app_url'),
             (string) config('sso.redirect_path', '/oauth/callback'),

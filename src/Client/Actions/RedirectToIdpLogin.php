@@ -10,7 +10,7 @@ final class RedirectToIdpLogin
 {
     public function execute(?string $prompt = null): RedirectResponse
     {
-        $idpUrl = (string) config('sso.idp_url');
+        $idpUrl = (string) config('sso.base_url');
         $projectId = (string) config('sso.project_id');
         $clientId = (string) config('sso.client_id');
         $clientSecret = (string) config('sso.client_secret');

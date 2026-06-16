@@ -4,6 +4,8 @@ This document explains **what this package provides** and **what each related pr
 
 **Package repo:** [github.com/asheek21-baaboo/sso-composer](https://github.com/asheek21-baaboo/sso-composer)
 
+**Minimal standalone IdP:** [minimal-idp-host-guide.md](./minimal-idp-host-guide.md) — package vs host responsibilities, current boilerplate, and proposed publishable stubs to reduce it (`baaboo-sso-dev` is the reference host).
+
 ---
 
 ## One-sentence summary
@@ -86,7 +88,7 @@ SsoUser::createUser();   // whether IdP provisions users for this project
 
 | Env variable | Config key | Required | Purpose |
 |--------------|------------|----------|---------|
-| `SSO_BASE_URL` | `idp_url` | Yes | IdP base URL (no trailing slash) |
+| `SSO_BASE_URL` | `base_url` | Yes (client only) | IdP base URL (no trailing slash) |
 | `SSO_PROJECT_ID` | `project_id` | Yes | Project slug (JWT `aud` / `project_id`) |
 | `SSO_CLIENT_ID` | `client_id` | Yes | OAuth client UUID |
 | `SSO_CLIENT_SECRET` | `client_secret` | Yes | Plain secret (never expose to browser) |

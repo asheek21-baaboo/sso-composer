@@ -14,8 +14,7 @@ beforeEach(function (): void {
     $publicPem = (string) file_get_contents(__DIR__.'/../../Fixtures/jwt/rs256-public.pem');
 
     config([
-        'sso.mode' => 'client',
-        'sso.idp_url' => 'https://idp.test',
+        'sso.base_url' => 'https://idp.test',
         'sso.project_id' => 'my-app',
         'sso.client_id' => (string) \Illuminate\Support\Str::uuid(),
         'sso.client_secret' => 'secret',
