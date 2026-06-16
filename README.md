@@ -146,7 +146,7 @@ vendor/bin/pint
 
 ## Further reading
 
-- [docs/implementation-summary.md](docs/implementation-summary.md) — build history and integration notes
+- [docs/implementation-summary.md](docs/implementation-summary.md) — integration guide: what this package provides, and what IdP / apps / sso-starter must do
 
 ## License
 
